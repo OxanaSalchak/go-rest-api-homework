@@ -66,6 +66,24 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getTasks(w http.ResponseWriter, r *http.Request) {
+	tasksList := make([]Task, 0)
+	for _, task := range tasks {
+		tasksList = append(tasksList, task)
+	}
+	resp, err := json.Marshal(tasksList)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(resp)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func postTask(w http.ResponseWriter, r *http.Request) {
 	var task Task
 	var buf bytes.Buffer
@@ -106,7 +124,7 @@ func main() {
 	r := chi.NewRouter()
 
 	// здесь регистрируйте ваши обработчики
-	r.Get("/tasks", getTask)
+	r.Get("/tasks", getTasks)
 	r.Post("/tasks", postTask)
 	r.Get("/tasks/{id}", getTask)
 	r.Delete("/tasks/{id}", deleteTask)
